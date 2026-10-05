@@ -50,8 +50,8 @@
   /* ---------- Ikon sarana ---------- */
   :root{--s:26px}
   .pin-wrap{width:var(--s);height:var(--s);margin-left:calc(var(--s) / -2);margin-top:calc(var(--s) / -2);background:none;border:0}
-  .pin{width:100%;height:100%;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;transition:transform .12s;box-sizing:border-box}
-  .pin svg{width:78%;height:78%;display:block}
+  .pin{width:100%;height:100%;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.5));transition:transform .12s}
+  .pin svg{width:100%;height:100%;display:block;fill:#000}
   .pin-wrap:hover .pin{transform:scale(1.25)}
   .lg-pin{display:inline-block;width:20px;height:20px;margin:0 6px 0 0;vertical-align:-5px}
 
@@ -140,17 +140,16 @@ const JENIS = {
   'Pura':     {warna:'#8a46b8'}
 };
 
-/* Simbol putih per jenis (viewBox 24x24) */
-const GLYPH = {
-  'Masjid': '<path d="M6 17v-3a6 6 0 0 1 12 0v3z"/><rect x="3.2" y="10.5" width="2" height="6.5"/><path d="M3.2 10.5l1-2.2 1 2.2z"/><rect x="18.8" y="10.5" width="2" height="6.5"/><path d="M18.8 10.5l1-2.2 1 2.2z"/><rect x="3" y="17.3" width="18" height="1.9"/><path d="M13.3 2.8a2.3 2.3 0 1 0 0 3.8a1.8 1.8 0 1 1 0-3.8z"/>',
-  'Musholla': '<path d="M7 12.5a5 5 0 0 1 10 0z"/><rect x="5.5" y="12.5" width="13" height="6"/><path d="M13.2 3.4a2.2 2.2 0 1 0 0 3.6a1.7 1.7 0 1 1 0-3.6z"/>',
-  'Gereja': '<path d="M11 1.8h2v2.2h2.2v2H13v2.4h-2V6H8.8V4H11z"/><path fill-rule="evenodd" d="M12 9.2l6 4.3V20H6v-6.5zM10.4 20v-3.6a1.6 1.6 0 0 1 3.2 0V20z"/>',
-  'Vihara': '<path d="M12 2.5l3.6 3.5H8.4z"/><path d="M12 7l5.2 4H6.8z"/><path d="M12 12l7 5.2H5z"/><rect x="8.5" y="17.6" width="7" height="2.6"/>',
-  'Klenteng': '<path d="M1.8 11.6q6.4-.6 10.2-7.4q3.8 6.8 10.2 7.4l-1.8 2.2H3.6z"/><rect x="5.5" y="14.2" width="2.2" height="6"/><rect x="16.3" y="14.2" width="2.2" height="6"/><rect x="10.4" y="14.8" width="3.2" height="5.4"/>',
-  'Pura': '<path d="M3.2 19.5V15H5.6v-2.6H8.2V9h2.4v10.5z"/><path d="M20.8 19.5V15H18.4v-2.6H15.8V9h-2.4v10.5z"/>'
-};
+/* Simbologi sesuai file Style_Peta_Desa.style (font "Geosiana Desa"):
+   lapis dasar = lingkaran (karakter "o"), lapis ikon = Masjid G, Mushola H, Gereja I, Pura J, Vihara K, Klenteng L.
+   Bentuk diambil dari font dan disimpan sebagai path SVG supaya tidak perlu memuat file font. */
+const SIMBOL_VB = '-40 -2088 2128 2128';
+const SIMBOL_RING = 'M1024 2048Q1447 2048 1748 1748Q2048 1447 2048 1024Q2048 600 1748 300Q1447 0 1024 0Q600 0 300 300Q0 600 0 1024Q0 1447 300 1748Q600 2048 1024 2048ZM1024 1948Q641 1948 370 1677Q100 1406 100 1024Q100 641 370 370Q641 100 1024 100Q1406 100 1677 370Q1948 641 1948 1024Q1948 1406 1677 1677Q1406 1948 1024 1948Z';
+const SIMBOL = {"Masjid": "M1108 1644 1147 1522H1275L1171 1448L1211 1326L1108 1401L1005 1326L1044 1448L941 1522H1068ZM376 583V724H454Q463 844 612 966Q761 1089 974 1100V1263Q889 1275 831 1340Q773 1406 773 1495Q773 1591 842 1660Q910 1729 1007 1729Q1088 1729 1152 1678Q1114 1697 1073 1697Q995 1697 940 1638Q886 1578 886 1495Q886 1411 940 1352Q995 1293 1073 1293Q1114 1293 1152 1312Q1113 1281 1074 1271V1100Q1286 1089 1435 966Q1584 844 1594 724H1672V583Z", "Musholla": "M949 1237V1361Q719 1384 564 1548L548 1565L634 1681L658 1657Q801 1514 1020 1514Q1122 1514 1220 1552Q1318 1590 1390 1665L1413 1690L1500 1574L1484 1557Q1332 1391 1106 1363V1237H1455V365H583V1237Z", "Gereja": "M940 1228V1418H756V1575H940V1692H1097V1575H1281V1418H1097V1228H1460V356H588V1228Z", "Pura": "M616 1277Q820 1277 1024 1277Q1228 1277 1432 1277V462H616ZM1432 1403H616L1029 1617Z", "Vihara": "M616 1294Q820 1294 1024 1294Q1228 1294 1432 1294V479H616ZM616 1398Q616 1477 736 1569Q855 1661 1024 1661Q1192 1661 1312 1569Q1432 1477 1432 1398Z", "Klenteng": "M1434 1616Q1434 1535 1314 1456Q1195 1377 1027 1377Q858 1377 738 1456Q619 1535 619 1616ZM614 1281Q818 1281 1022 1281Q1225 1281 1429 1281V466H614Z"};
 function pinHtml(j){
-  return '<div class="pin" style="background:' + JENIS[j].warna + '"><svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true">' + GLYPH[j] + '</svg></div>';
+  return '<div class="pin"><svg viewBox="' + SIMBOL_VB + '" aria-hidden="true"><g transform="scale(1,-1)">'
+    + '<circle cx="1024" cy="1024" r="1024" fill="#fff"/>'
+    + '<path d="' + SIMBOL_RING + '"/><path d="' + SIMBOL[j] + '"/></g></svg></div>';
 }
 function ikon(j){
   return L.divIcon({className:'pin-wrap', html:pinHtml(j), iconSize:null, popupAnchor:[0,-12]});
@@ -159,7 +158,7 @@ const ikonCache = {};
 Object.keys(JENIS).forEach(k => ikonCache[k] = ikon(k));
 function ukuranIkon(){
   const z = map.getZoom();
-  document.documentElement.style.setProperty('--s', (z <= 11 ? 16 : z <= 13 ? 20 : z <= 15 ? 24 : 30) + 'px');
+  document.documentElement.style.setProperty('--s', (z <= 11 ? 18 : z <= 13 ? 22 : z <= 15 ? 28 : 34) + 'px');
 }
 
 
