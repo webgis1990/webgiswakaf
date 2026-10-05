@@ -107,9 +107,9 @@
    PENGATURAN – ubah di sini bila perlu
    ===================================================================== */
 const CONFIG = {
-  // Foto lokasi: foto/1.jpg, foto/2.jpg, ... (urut sesuai baris di Excel, mulai dari 1)
+  // Foto lokasi: Foto/1.jpg, Foto/2.png, ... (urut sesuai baris di Excel, mulai dari 1). Huruf besar/kecil nama folder harus sama persis dengan di GitHub
   fotoFolder: 'Foto/',
-  fotoExt: ['jpg','jpeg','png','webp','JPG','JPEG','PNG'],     // ekstensi yang dicoba berurutan
+  fotoExt: ['jpg','png','jpeg','webp','JPG','PNG','JPEG'],     // ekstensi yang dicoba berurutan
   // Batas kecamatan GADM 4.1 level 3: file lokal dicoba dulu, lalu layanan online
   kecamatanFile: 'data/kecamatan_gadm.geojson',
   kecamatanOnline: "https://services5.arcgis.com/PM9R4Df2R9IubE8O/ArcGIS/rest/services/gadm41_IDN_shp/FeatureServer/3/query"
@@ -180,7 +180,7 @@ function muatFoto(wadah, d){
   img.onerror = () => {
     n++;
     if (n < CONFIG.fotoExt.length) img.src = CONFIG.fotoFolder + d.i + '.' + CONFIG.fotoExt[n];
-    else wadah.innerHTML = '<div class="foto-none">Foto belum tersedia<br>(foto/' + d.i + '.jpg)</div>';
+    else wadah.innerHTML = '<div class="foto-none">Foto belum tersedia<br>(' + CONFIG.fotoFolder + d.i + '.jpg)</div>';
   };
   img.onclick = () => bukaLightbox(img.src);
   img.src = CONFIG.fotoFolder + d.i + '.' + CONFIG.fotoExt[0];
