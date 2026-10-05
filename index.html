@@ -46,6 +46,15 @@
   .lg-n{color:var(--ink-2);font-size:12px}
   .leaflet-top.leaflet-right{top:calc(env(safe-area-inset-top,0px))}
 
+
+  /* ---------- Ikon sarana ---------- */
+  :root{--s:26px}
+  .pin-wrap{width:var(--s);height:var(--s);margin-left:calc(var(--s) / -2);margin-top:calc(var(--s) / -2);background:none;border:0}
+  .pin{width:100%;height:100%;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;transition:transform .12s;box-sizing:border-box}
+  .pin svg{width:78%;height:78%;display:block}
+  .pin-wrap:hover .pin{transform:scale(1.25)}
+  .lg-pin{display:inline-block;width:20px;height:20px;margin:0 6px 0 0;vertical-align:-5px}
+
   /* ---------- Label kecamatan ---------- */
   .kec-label{background:none;border:0;box-shadow:none;color:#0b3b5c;font-weight:700;font-size:11px;letter-spacing:.2px;
     text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;padding:0;pointer-events:none}
@@ -131,6 +140,29 @@ const JENIS = {
   'Pura':     {warna:'#8a46b8'}
 };
 
+/* Simbol putih per jenis (viewBox 24x24) */
+const GLYPH = {
+  'Masjid': '<path d="M6 17v-3a6 6 0 0 1 12 0v3z"/><rect x="3.2" y="10.5" width="2" height="6.5"/><path d="M3.2 10.5l1-2.2 1 2.2z"/><rect x="18.8" y="10.5" width="2" height="6.5"/><path d="M18.8 10.5l1-2.2 1 2.2z"/><rect x="3" y="17.3" width="18" height="1.9"/><path d="M13.3 2.8a2.3 2.3 0 1 0 0 3.8a1.8 1.8 0 1 1 0-3.8z"/>',
+  'Musholla': '<path d="M7 12.5a5 5 0 0 1 10 0z"/><rect x="5.5" y="12.5" width="13" height="6"/><path d="M13.2 3.4a2.2 2.2 0 1 0 0 3.6a1.7 1.7 0 1 1 0-3.6z"/>',
+  'Gereja': '<path d="M11 1.8h2v2.2h2.2v2H13v2.4h-2V6H8.8V4H11z"/><path fill-rule="evenodd" d="M12 9.2l6 4.3V20H6v-6.5zM10.4 20v-3.6a1.6 1.6 0 0 1 3.2 0V20z"/>',
+  'Vihara': '<path d="M12 2.5l3.6 3.5H8.4z"/><path d="M12 7l5.2 4H6.8z"/><path d="M12 12l7 5.2H5z"/><rect x="8.5" y="17.6" width="7" height="2.6"/>',
+  'Klenteng': '<path d="M1.8 11.6q6.4-.6 10.2-7.4q3.8 6.8 10.2 7.4l-1.8 2.2H3.6z"/><rect x="5.5" y="14.2" width="2.2" height="6"/><rect x="16.3" y="14.2" width="2.2" height="6"/><rect x="10.4" y="14.8" width="3.2" height="5.4"/>',
+  'Pura': '<path d="M3.2 19.5V15H5.6v-2.6H8.2V9h2.4v10.5z"/><path d="M20.8 19.5V15H18.4v-2.6H15.8V9h-2.4v10.5z"/>'
+};
+function pinHtml(j){
+  return '<div class="pin" style="background:' + JENIS[j].warna + '"><svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true">' + GLYPH[j] + '</svg></div>';
+}
+function ikon(j){
+  return L.divIcon({className:'pin-wrap', html:pinHtml(j), iconSize:null, popupAnchor:[0,-12]});
+}
+const ikonCache = {};
+Object.keys(JENIS).forEach(k => ikonCache[k] = ikon(k));
+function ukuranIkon(){
+  const z = map.getZoom();
+  document.documentElement.style.setProperty('--s', (z <= 11 ? 16 : z <= 13 ? 20 : z <= 15 ? 24 : 30) + 'px');
+}
+
+
 /* ---------- Peta & basemap ---------- */
 const map = L.map('map', {center:CONFIG.pusat, zoom:CONFIG.zoom, preferCanvas:true, zoomControl:false, maxZoom:20});
 L.control.zoom({position:'bottomright'}).addTo(map);
@@ -189,12 +221,8 @@ function muatFoto(wadah, d){
 
 DATA.forEach(d => {
   if (!JENIS[d.j]) return;
-  const m = L.circleMarker([d.la, d.lo], {
-    renderer:canvas, radius:6, color:'#fff', weight:1.4, fillColor:JENIS[d.j].warna, fillOpacity:.95
-  });
+  const m = L.marker([d.la, d.lo], {icon:ikonCache[d.j], title:d.n, riseOnHover:true});
   m.bindPopup(() => isiPopup(d), {autoPanPadding:[20,70]});
-  m.on('mouseover', () => m.setStyle({radius:9}));
-  m.on('mouseout',  () => m.setStyle({radius:6}));
   m.addTo(grup[d.j]);
   hitung[d.j]++;
   semuaMarker.push({d, m});
@@ -222,7 +250,6 @@ function tampilkanKecamatan(gj){
   });
   kecLayer.addLayer(lyr);
   lyr.bringToBack();
-  Object.values(grup).forEach(g => g.eachLayer(m => m.bringToFront()));
 }
 function ambilKecamatan(){
   fetch(CONFIG.kecamatanFile).then(r => { if(!r.ok) throw 0; return r.json(); })
@@ -232,7 +259,7 @@ function ambilKecamatan(){
 }
 ambilKecamatan();
 function atur(){ document.body.classList.toggle('hide-kec-label', map.getZoom() > 15); }
-map.on('zoomend', atur); atur();
+map.on('zoomend', () => { atur(); ukuranIkon(); }); atur();
 
 /* ---------- Kontrol layer ---------- */
 const basemaps = {
@@ -241,12 +268,13 @@ const basemaps = {
 };
 const overlays = {};
 Object.keys(JENIS).forEach(k => {
-  overlays[`<span class="lg-dot" style="background:${JENIS[k].warna}"></span>${k} <span class="lg-n">${hitung[k]}</span>`] = grup[k];
+  overlays[`<span class="lg-pin">${pinHtml(k)}</span>${k} <span class="lg-n">${hitung[k]}</span>`] = grup[k];
 });
 overlays['<span class="lg-line"></span>Batas kecamatan (GADM)'] = kecLayer;
 const kontrol = L.control.layers(basemaps, overlays, {collapsed:window.innerWidth < 700, position:'topright'}).addTo(map);
 
 /* ---------- Fit ke data ---------- */
+ukuranIkon();
 map.fitBounds(L.latLngBounds(DATA.map(d => [d.la, d.lo])), {padding:[30,30]});
 
 /* ---------- Pencarian ---------- */
